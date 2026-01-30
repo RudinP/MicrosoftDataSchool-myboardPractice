@@ -2,16 +2,25 @@
 {% block title %}FMS 배송 지도{% endblock %}
 {% block content %}
 
-<h2 class="text-2xl font-bold text-gray-800 mb-6">고객사 / 도착지 기준 배송 현황</h2>
+<div class="bg-gradient-to-r from-pink-100 via-indigo-50 to-teal-100 rounded-2xl p-6 mb-6 shadow-sm">
+  <h2 class="text-2xl font-extrabold text-gray-800 mb-2">
+    🚚 고객사 / 도착지 기준 배송 현황
+  </h2>
+  <p class="text-sm text-gray-700">
+    한국 주요 도시 기준으로 배송 도착지와 고객사별 출하 건수를
+    <span class="font-semibold text-pink-500">파스텔톤 버블</span>로 표시했습니다.
+    버블이 클수록 해당 도착지로 가는 물량이 많다는 의미예요.
+  </p>
+  <p class="text-xs text-gray-600 mt-2">
+    * 지명까지 완전히 한글로 보이게 하려면 한국어 지도를 제공하는 타일 서버 URL을
+    <code class="bg-white/60 px-1 rounded-md text-[11px]">KOREAN_TILE_URL</code>
+    환경 변수에 설정해 주세요. (예: VWorld, Naver 지도 등)
+  </p>
+</div>
 
-<p class="text-sm text-gray-600 mb-4">
-  한국 주요 도시 기준으로 배송 도착지(도착지)와 고객사별 출하 건수를
-  파스텔톤 버블로 시각화했습니다. 버블이 클수록 해당 도착지로 가는 물량이 많다는 의미입니다.
-</p>
-
-<div class="bg-white rounded-lg shadow-md p-4">
+<div class="bg-white rounded-2xl shadow-md p-3 border border-pink-100">
   <!-- folium에서 생성한 전체 HTML을 그대로 삽입 -->
-  <div class="w-full">
+  <div class="w-full rounded-xl overflow-hidden">
     {{ map_html|safe }}
   </div>
 </div>

@@ -339,8 +339,27 @@ def fms_map():
         "제주": (33.4996, 126.5312),
     }
 
-    # 기본 지도 (대한민국 중심)
-    m = folium.Map(location=[36.5, 127.8], zoom_start=6, tiles="CartoDB positron")
+    # 기본 지도 (대한민국 중심, 귀여운 파스텔 톤 스타일)
+    # tiles는 한국어 지도가 가능한 타일 서버를 ENV로 받을 수 있게 구성
+    # 예: VWORLD, NAVER 등 -> .env에 KOREAN_TILE_URL 설정
+    korean_tiles = os.getenv("KOREAN_TILE_URL")
+    if korean_tiles:
+        m = folium.Map(location=[36.5, 127.8], zoom_start=7, tiles=None, control_scale=True)
+        folium.TileLayer(
+            tiles=korean_tiles,
+            attr="Korean map tiles",
+            name="한국어 지도",
+            overlay=False,
+            control=False,
+        ).add_to(m)
+    else:
+        # 기본 CartoDB 지도 (밝은 파스텔 톤)
+        m = folium.Map(
+            location=[36.5, 127.8],
+            zoom_start=7,
+            tiles="CartoDB positron",
+            control_scale=True,
+        )
 
     for row in rows:
         company = row["고객사"]
@@ -353,10 +372,16 @@ def fms_map():
 
         lat, lon = city_coords[city]
 
-        # 출하 건수에 따라 마커 크기 조정 (최소 6, 최대 20 정도)
-        radius = min(20, 6 + count * 0.8)
+        # 출하 건수에 따라 마커 크기 조정 (최소 8, 최대 24 정도)
+        radius = min(24, 8 + count * 0.7)
 
-        popup_html = f"<b>{company}</b><br>{city}<br>출하 건수: {count}건"
+        popup_html = f"""
+        <div style='font-size:13px;'>
+          <b>고객사:</b> {company}<br>
+          <b>도착지:</b> {city}<br>
+          <b>출하 건수:</b> {count}건
+        </div>
+        """
 
         folium.CircleMarker(
             location=[lat, lon],
@@ -365,8 +390,8 @@ def fms_map():
             color="#FFB5E8",  # 파스텔 핑크
             fill=True,
             fill_color="#B5EAD7",  # 파스텔 민트
-            fill_opacity=0.7,
-            weight=1,
+            fill_opacity=0.8,
+            weight=1.2,
         ).add_to(m)
 
     # folium 지도를 HTML로 렌더링
