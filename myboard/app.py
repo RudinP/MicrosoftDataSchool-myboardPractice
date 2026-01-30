@@ -59,7 +59,7 @@ def create_post():
     conn = get_db_connection()
     cursor = conn.cursor(cursor_factory=DictCursor)
     # 2. INSERT
-    cursor.execute("INSERT INTO board.posts (title, content, author) VALUES (%s, %s, %s) RETURNING id", (title,author,content ))
+    cursor.execute("INSERT INTO board.posts (title, author, content) VALUES (%s, %s, %s) RETURNING id", (title,author,content ))
     post_id = cursor.fetchone()[0]
     cursor.close()
     conn.close()
