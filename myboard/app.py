@@ -242,6 +242,18 @@ def fms_analytics():
     )
     daily_rows = cursor.fetchall()
 
+    # 4) 고객사별 출하 마릿수 (Top 5)
+    cursor.execute(
+        """
+        SELECT 고객사, COUNT(*) AS count
+        FROM fms.total_result
+        GROUP BY 고객사
+        ORDER BY count DESC
+        LIMIT 5
+        """
+    )
+    company_rows = cursor.fetchall()
+
     cursor.close()
     conn.close()
 
@@ -290,6 +302,10 @@ def fms_analytics():
     ]
     daily_values = [row["count"] for row in daily_rows]
 
+    # ---------- 막대 차트: 고객사별 출하량 Top 5 ----------
+    company_labels = [row["고객사"] for row in company_rows]
+    company_values = [row["count"] for row in company_rows]
+
     # 배송 지도 HTML 생성
     map_html = build_fms_map()
 
@@ -301,6 +317,8 @@ def fms_analytics():
         pf_datasets=json.dumps(pf_datasets, ensure_ascii=False),
         daily_labels=json.dumps(daily_labels, ensure_ascii=False),
         daily_values=json.dumps(daily_values),
+        company_labels=json.dumps(company_labels, ensure_ascii=False),
+        company_values=json.dumps(company_values),
         map_html=map_html,
     )
 
