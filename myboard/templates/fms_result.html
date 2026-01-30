@@ -12,27 +12,74 @@
   </a>
 </div>
 
-<div class="bg-white rounded-lg shadow-md overflow-hidden">
-  <div class="overflow-x-auto">
-    <table class="min-w-full divide-y divide-gray-200">
-      <thead class="bg-indigo-600 text-white">
-        <tr>
-          {% for column in results[0].keys() %}
-          <th class="px-4 py-3 text-left text-sm font-semibold uppercase tracking-wider whitespace-nowrap">{{ column }}</th>
-          {% endfor %}
-        </tr>
-      </thead>
-      <tbody class="bg-white divide-y divide-gray-200">
-        {% for row in results %}
-        <tr class="hover:bg-indigo-50 transition-colors {% if loop.index % 2 == 0 %}bg-gray-50{% endif %}">
-          {% for key, value in row.items() %}
-          <td class="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">{{ value }}</td>
-          {% endfor %}
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+{% if results %}
+<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+  {% for row in results %}
+  {% set status = row['부적합여부'] %}
+  {% set is_pass = status in ['Pass', 'PASS', 'pass', '합격', 'Y', 'N'] %}
+  <div class="bg-white rounded-2xl shadow-md p-4 border border-pink-100 hover:shadow-lg transition-shadow">
+    <div class="flex items-center justify-between mb-2">
+      <div>
+        <p class="text-xs text-gray-400">육계번호</p>
+        <p class="font-semibold text-gray-800 text-sm">
+          {{ row['육계번호'] }}
+        </p>
+      </div>
+      <span
+        class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold
+          {% if is_pass %}
+            bg-emerald-100 text-emerald-700
+          {% else %}
+            bg-rose-100 text-rose-700
+          {% endif %}"
+      >
+        {% if is_pass %}
+        <span class="mr-1">✅</span> {{ status or 'Pass' }}
+        {% else %}
+        <span class="mr-1">⚠️</span> {{ status or 'Fail' }}
+        {% endif %}
+      </span>
+    </div>
+
+    <div class="mt-2 space-y-1 text-xs text-gray-700">
+      <div class="flex justify-between">
+        <span class="text-gray-500">품종</span>
+        <span class="font-medium text-indigo-700">{{ row['품종'] }}</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-gray-500">종란무게</span>
+        <span class="font-medium">{{ row['종란무게'] }}</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-gray-500">체온</span>
+        <span class="font-medium">{{ row['체온'] }}</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-gray-500">호흡수 / 호수</span>
+        <span class="font-medium">
+          {{ row['호흡수'] }} / {{ row['호수'] }}
+        </span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-gray-500">주문번호</span>
+        <span class="font-medium">{{ row['주문번호'] }}</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-gray-500">고객사</span>
+        <span class="font-medium text-pink-600">{{ row['고객사'] }}</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-gray-500">도착일 / 도착지</span>
+        <span class="font-medium">
+          {{ row['도착일'] }} · {{ row['도착지'] }}
+        </span>
+      </div>
+    </div>
   </div>
+  {% endfor %}
 </div>
+{% else %}
+<p class="text-sm text-gray-500">표시할 FMS 결과가 없습니다.</p>
+{% endif %}
 
 {% endblock %}
