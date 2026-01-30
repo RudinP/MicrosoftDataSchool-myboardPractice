@@ -290,6 +290,9 @@ def fms_analytics():
     ]
     daily_values = [row["count"] for row in daily_rows]
 
+    # 배송 지도 HTML 생성
+    map_html = build_fms_map()
+
     return render_template(
         "fms_analytics.html",
         breed_labels=json.dumps(breed_labels, ensure_ascii=False),
@@ -298,12 +301,12 @@ def fms_analytics():
         pf_datasets=json.dumps(pf_datasets, ensure_ascii=False),
         daily_labels=json.dumps(daily_labels, ensure_ascii=False),
         daily_values=json.dumps(daily_values),
+        map_html=map_html,
     )
 
 
-@app.route('/fms/map')
-def fms_map():
-    """고객사 / 도착지 기준 배송 현황 지도 시각화"""
+def build_fms_map():
+    """고객사 / 도착지 기준 배송 현황 지도 생성 (folium HTML 반환)"""
     conn = get_db_connection()
     cursor = conn.cursor(cursor_factory=DictCursor)
 
@@ -394,9 +397,14 @@ def fms_map():
             weight=1.2,
         ).add_to(m)
 
-    # folium 지도를 HTML로 렌더링
-    map_html = m._repr_html_()
+    # folium 지도를 HTML로 렌더링하여 반환
+    return m._repr_html_()
 
+
+@app.route('/fms/map')
+def fms_map():
+    """고객사 / 도착지 기준 배송 현황 지도 시각화 (단독 페이지)"""
+    map_html = build_fms_map()
     return render_template("fms_map.html", map_html=map_html)
 
 
