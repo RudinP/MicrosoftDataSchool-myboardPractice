@@ -5,6 +5,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from dotenv import load_dotenv
 from datetime import datetime
 import json
+import folium
 
 # 로컬 환경에서는 .env를 읽고, Azure에서는 패스.
 if os.path.exists('.env'):
@@ -200,6 +201,178 @@ def fms_result():
     cursor.close()
     conn.close()
     return render_template('fms_result.html', results=results)
+
+
+@app.route('/fms/analytics')
+def fms_analytics():
+    """FMS 데이터 기반 분석/시각화 페이지"""
+    conn = get_db_connection()
+    cursor = conn.cursor(cursor_factory=DictCursor)
+
+    # 1) 품종별 전체 마릿수
+    cursor.execute(
+        """
+        SELECT 품종, COUNT(*) AS count
+        FROM fms.total_result
+        GROUP BY 품종
+        ORDER BY count DESC
+        """
+    )
+    breed_rows = cursor.fetchall()
+
+    # 2) 품종별 Pass / Fail 분포
+    cursor.execute(
+        """
+        SELECT 품종, 부적합여부, COUNT(*) AS count
+        FROM fms.total_result
+        GROUP BY 품종, 부적합여부
+        ORDER BY 품종, 부적합여부
+        """
+    )
+    pf_rows = cursor.fetchall()
+
+    # 3) 날짜별 출하 마릿수
+    cursor.execute(
+        """
+        SELECT 도착일, COUNT(*) AS count
+        FROM fms.total_result
+        GROUP BY 도착일
+        ORDER BY 도착일
+        """
+    )
+    daily_rows = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    # ---------- 파이 차트: 품종별 분포 ----------
+    breed_labels = [row["품종"] for row in breed_rows]
+    breed_values = [row["count"] for row in breed_rows]
+
+    # ---------- 스택 막대: 품종별 Pass/Fail ----------
+    breeds = sorted({row["품종"] for row in pf_rows})
+    statuses = sorted({row["부적합여부"] for row in pf_rows})
+
+    breed_index = {b: i for i, b in enumerate(breeds)}
+    pf_data = {status: [0] * len(breeds) for status in statuses}
+
+    for row in pf_rows:
+        b = row["품종"]
+        s = row["부적합여부"]
+        pf_data[s][breed_index[b]] = row["count"]
+
+    pastel_colors = [
+        "#FFB5E8",
+        "#B5DEFF",
+        "#C7CEEA",
+        "#E2F0CB",
+        "#FFDAC1",
+        "#FF9AA2",
+        "#B5EAD7",
+        "#E7FFAC",
+    ]
+
+    pf_datasets = []
+    for i, status in enumerate(statuses):
+        pf_datasets.append(
+            {
+                "label": status,
+                "data": pf_data[status],
+                "backgroundColor": pastel_colors[i % len(pastel_colors)],
+                "borderWidth": 1,
+            }
+        )
+
+    # ---------- 라인 차트: 날짜별 출하량 ----------
+    daily_labels = [
+        row["도착일"].strftime("%Y-%m-%d") if row["도착일"] else ""
+        for row in daily_rows
+    ]
+    daily_values = [row["count"] for row in daily_rows]
+
+    return render_template(
+        "fms_analytics.html",
+        breed_labels=json.dumps(breed_labels, ensure_ascii=False),
+        breed_values=json.dumps(breed_values),
+        pf_labels=json.dumps(breeds, ensure_ascii=False),
+        pf_datasets=json.dumps(pf_datasets, ensure_ascii=False),
+        daily_labels=json.dumps(daily_labels, ensure_ascii=False),
+        daily_values=json.dumps(daily_values),
+    )
+
+
+@app.route('/fms/map')
+def fms_map():
+    """고객사 / 도착지 기준 배송 현황 지도 시각화"""
+    conn = get_db_connection()
+    cursor = conn.cursor(cursor_factory=DictCursor)
+
+    # 고객사 / 도착지별 출하 건수
+    cursor.execute(
+        """
+        SELECT 고객사, 도착지, COUNT(*) AS count
+        FROM fms.total_result
+        GROUP BY 고객사, 도착지
+        ORDER BY count DESC
+        """
+    )
+    rows = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    # 한국 주요 도시 좌표 (대략값)
+    city_coords = {
+        "서울": (37.5665, 126.9780),
+        "인천": (37.4563, 126.7052),
+        "부산": (35.1796, 129.0756),
+        "대구": (35.8714, 128.6014),
+        "광주": (35.1595, 126.8526),
+        "대전": (36.3504, 127.3845),
+        "울산": (35.5384, 129.3114),
+        "세종": (36.4800, 127.2890),
+        "수원": (37.2636, 127.0286),
+        "창원": (35.2270, 128.6813),
+        "청주": (36.6424, 127.4890),
+        "전주": (35.8242, 127.1480),
+        "포항": (36.0190, 129.3435),
+        "제주": (33.4996, 126.5312),
+    }
+
+    # 기본 지도 (대한민국 중심)
+    m = folium.Map(location=[36.5, 127.8], zoom_start=6, tiles="CartoDB positron")
+
+    for row in rows:
+        company = row["고객사"]
+        city = row["도착지"]
+        count = row["count"]
+
+        if city not in city_coords:
+            # 좌표가 정의되지 않은 도시는 스킵
+            continue
+
+        lat, lon = city_coords[city]
+
+        # 출하 건수에 따라 마커 크기 조정 (최소 6, 최대 20 정도)
+        radius = min(20, 6 + count * 0.8)
+
+        popup_html = f"<b>{company}</b><br>{city}<br>출하 건수: {count}건"
+
+        folium.CircleMarker(
+            location=[lat, lon],
+            radius=radius,
+            popup=popup_html,
+            color="#FFB5E8",  # 파스텔 핑크
+            fill=True,
+            fill_color="#B5EAD7",  # 파스텔 민트
+            fill_opacity=0.7,
+            weight=1,
+        ).add_to(m)
+
+    # folium 지도를 HTML로 렌더링
+    map_html = m._repr_html_()
+
+    return render_template("fms_map.html", map_html=map_html)
 
 
 if __name__ == '__main__':

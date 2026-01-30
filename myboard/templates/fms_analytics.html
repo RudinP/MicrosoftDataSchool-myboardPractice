@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% block title %}FMS 데이터 분석{% endblock %}
+{% block content %}
+
+<h2 class="text-2xl font-bold text-gray-800 mb-6">FMS 데이터 분석 & 시각화</h2>
+
+<div class="grid gap-8 lg:grid-cols-2">
+  <!-- 품종별 분포 파이 차트 -->
+  <div class="bg-white rounded-lg shadow-md p-6">
+    <h3 class="text-lg font-semibold text-gray-800 mb-4">
+      품종별 출하 비율
+    </h3>
+    <p class="text-sm text-gray-500 mb-4">
+      전체 출하 물량 중 각 품종이 차지하는 비율입니다.
+    </p>
+    <div class="relative h-72">
+      <canvas id="breedPieChart"></canvas>
+    </div>
+  </div>
+
+  <!-- 품종별 Pass / Fail 막대 차트 -->
+  <div class="bg-white rounded-lg shadow-md p-6">
+    <h3 class="text-lg font-semibold text-gray-800 mb-4">
+      품종별 Pass / Fail 분포
+    </h3>
+    <p class="text-sm text-gray-500 mb-4">
+      품종별로 합격/부적합 물량이 어떻게 분포하는지 보여줍니다.
+    </p>
+    <div class="relative h-72">
+      <canvas id="passFailBarChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- 날짜별 출하 추이 라인 차트 -->
+<div class="bg-white rounded-lg shadow-md p-6 mt-8">
+  <h3 class="text-lg font-semibold text-gray-800 mb-4">
+    날짜별 출하 추이
+  </h3>
+  <p class="text-sm text-gray-500 mb-4">
+    도착일 기준으로 일별 출하 마릿수 변화를 확인할 수 있습니다.
+  </p>
+  <div class="relative h-80">
+    <canvas id="dailyLineChart"></canvas>
+  </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  // Flask에서 전달된 데이터
+  const breedLabels = {{ breed_labels | safe }};
+  const breedValues = {{ breed_values | safe }};
+  const pfLabels = {{ pf_labels | safe }};
+  const pfDatasets = {{ pf_datasets | safe }};
+  const dailyLabels = {{ daily_labels | safe }};
+  const dailyValues = {{ daily_values | safe }};
+
+  // 파스텔톤 색상 팔레트
+  const pastelPalette = [
+    "#FFB5E8",
+    "#B5DEFF",
+    "#C7CEEA",
+    "#E2F0CB",
+    "#FFDAC1",
+    "#FF9AA2",
+    "#B5EAD7",
+    "#E7FFAC",
+  ];
+
+  // 1) 품종별 출하 비율 파이 차트
+  const breedCtx = document.getElementById("breedPieChart").getContext("2d");
+  new Chart(breedCtx, {
+    type: "doughnut",
+    data: {
+      labels: breedLabels,
+      datasets: [
+        {
+          data: breedValues,
+          backgroundColor: breedLabels.map(
+            (_, i) => pastelPalette[i % pastelPalette.length]
+          ),
+          borderColor: "#ffffff",
+          borderWidth: 2,
+        },
+      ],
+    },
+    options: {
+      plugins: {
+        legend: {
+          position: "bottom",
+          labels: {
+            padding: 16,
+          },
+        },
+      },
+      cutout: "55%",
+    },
+  });
+
+  // 2) 품종별 Pass / Fail 스택 막대 차트
+  const pfCtx = document.getElementById("passFailBarChart").getContext("2d");
+  new Chart(pfCtx, {
+    type: "bar",
+    data: {
+      labels: pfLabels,
+      datasets: pfDatasets,
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: "bottom",
+        },
+      },
+      scales: {
+        x: {
+          stacked: true,
+        },
+        y: {
+          stacked: true,
+          beginAtZero: true,
+        },
+      },
+    },
+  });
+
+  // 3) 날짜별 출하 추이 라인 차트
+  const dailyCtx = document.getElementById("dailyLineChart").getContext("2d");
+  new Chart(dailyCtx, {
+    type: "line",
+    data: {
+      labels: dailyLabels,
+      datasets: [
+        {
+          label: "출하 마릿수",
+          data: dailyValues,
+          backgroundColor: "rgba(181, 222, 255, 0.5)",
+          borderColor: "#B5DEFF",
+          borderWidth: 2,
+          tension: 0.3,
+          fill: true,
+          pointBackgroundColor: "#FFB5E8",
+          pointRadius: 4,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: "bottom",
+        },
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+        },
+      },
+    },
+  });
+</script>
+
+{% endblock %}
+

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}FMS 배송 지도{% endblock %}
+{% block content %}
+
+<h2 class="text-2xl font-bold text-gray-800 mb-6">고객사 / 도착지 기준 배송 현황</h2>
+
+<p class="text-sm text-gray-600 mb-4">
+  한국 주요 도시 기준으로 배송 도착지(도착지)와 고객사별 출하 건수를
+  파스텔톤 버블로 시각화했습니다. 버블이 클수록 해당 도착지로 가는 물량이 많다는 의미입니다.
+</p>
+
+<div class="bg-white rounded-lg shadow-md p-4">
+  <!-- folium에서 생성한 전체 HTML을 그대로 삽입 -->
+  <div class="w-full">
+    {{ map_html|safe }}
+  </div>
+</div>
+
+{% endblock %}
+
