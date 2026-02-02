@@ -1,6 +1,6 @@
 ## 프로젝트 소개
 
-`DATAPROJECT`는 닭(육계) 생산·건강·환경·출하 데이터를 통합 관리하고, 이를 **웹 대시보드 형태로 분석/시각화**하는 Flask 기반 애플리케이션입니다.  
+`myboardPractice`는 닭(육계) 생산·건강·환경·출하 데이터를 통합 관리하고, 이를 **웹 대시보드 형태로 분석/시각화**하는 Flask 기반 애플리케이션입니다.  
 게시판 기능과 함께 **FMS(농장 관리 시스템) 데이터 조회, 분석, 지도 시각화**를 한 곳에서 확인할 수 있도록 설계되었습니다.
 
 - **제작 방식**: 바이브코딩(Vibe Coding) 스타일로, IDE와 AI 코딩 에이전트를 적극 활용해 인터랙티브하게 설계·구현했습니다.
@@ -82,6 +82,12 @@
 
 ## 실행 방법
 https://3dt016-webapp-gfhaghgya6eggabf.koreacentral-01.azurewebsites.net/
+<img width="1920" height="1056" alt="image" src="https://github.com/user-attachments/assets/4d291cf6-a790-47a2-8341-e1c03cd78a32" />
+<img width="1920" height="1056" alt="image" src="https://github.com/user-attachments/assets/98f98d69-c306-48ea-ae64-99c692869595" />
+<img width="1920" height="1056" alt="image" src="https://github.com/user-attachments/assets/2da869d6-b729-44c6-a25f-a3ad375a0239" />
+<img width="1920" height="1056" alt="image" src="https://github.com/user-attachments/assets/d2ec3c40-8f50-40ae-8497-10f5bde2e4e9" />
+<img width="1920" height="1056" alt="image" src="https://github.com/user-attachments/assets/bebf20df-be8e-44f0-b387-a90cf9c32140" />
+
 ---
 
 ## 폴더 구조 (요약)
