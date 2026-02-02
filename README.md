@@ -15,6 +15,7 @@
   - psycopg2 (PostgreSQL 연동)
   - python-dotenv (환경 변수 관리)
   - Folium (지도 시각화)
+  - Azure Webapp
 
 - **Database**
   - PostgreSQL
