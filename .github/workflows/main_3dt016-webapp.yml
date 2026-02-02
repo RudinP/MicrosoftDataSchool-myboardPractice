@@ -65,3 +65,4 @@ jobs:
           app-name: '3dt016-webapp'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_523A1015E23D427486027C08BE460E6F }}
+          package: ./myboard
