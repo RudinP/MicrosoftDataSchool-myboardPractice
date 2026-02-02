@@ -80,46 +80,7 @@
 ---
 
 ## 실행 방법
-
-### 1. 환경 변수 설정
-
-프로젝트 루트에 `.env` 파일을 생성하고 다음 내용을 실제 환경에 맞게 채웁니다.
-
-```env
-DB_HOST=your-postgres-host
-DB_PORT=5432
-DB_NAME=your-db-name
-DB_USER=your-db-user
-DB_PASSWORD=your-db-password
-
-# 선택: 한국어 지도 타일 서버 URL (예: VWorld, Naver 등)
-# KOREAN_TILE_URL=https://example.com/tiles/{z}/{x}/{y}.png
-```
-
-### 2. 가상환경 및 패키지 설치
-
-```bash
-python -m venv venv
-venv\Scripts\activate  # Windows
-
-pip install -r requirements.txt  # 있다면
-# 또는
-pip install flask psycopg2-binary python-dotenv folium
-```
-
-### 3. 애플리케이션 실행
-
-```bash
-cd myboard
-python app.py
-```
-
-브라우저에서 아래 주소로 접속합니다.
-
-- 게시판: `http://127.0.0.1:5000/`
-- FMS 결과 카드뷰: `http://127.0.0.1:5000//fms/result`
-- FMS 분석 대시보드: `http://127.0.0.1:5000//fms/analytics`
-
+https://3dt016-webapp-gfhaghgya6eggabf.koreacentral-01.azurewebsites.net/
 ---
 
 ## 폴더 구조 (요약)
@@ -137,8 +98,10 @@ DATAPROJECT/
   │   │   ├─ fms_result.html   # FMS 통합 결과 카드뷰
   │   │   ├─ fms_analytics.html# FMS 분석 & 시각화 대시보드
   │   │   ├─ fms_map.html      # (선택) 지도 단독 페이지
-  │   └─ .env                  # DB 및 지도 타일 설정
+  │   ├─ .env                  # DB 및 지도 타일 설정
+  │   └─  requirements.txt  
   └─ README.md
+
 ```
 
 ---
